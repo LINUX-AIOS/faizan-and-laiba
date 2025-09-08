@@ -23,19 +23,19 @@ const ctx = canvas.getContext('2d');
 const info = document.getElementById('info');
 const quest = document.getElementById('quest');
 
-// Images
+// Images (all in same folder as index.html)
 const bgImgs = [];
 for(let i=1;i<=10;i++){
   const img = new Image();
-  img.src = `images/bg${i}.png`; 
+  img.src = `bg${i}.png`; 
   bgImgs.push(img);
 }
 const faizanImg = new Image();
-faizanImg.src = "images/faizan.png"; 
+faizanImg.src = "faizan.png"; 
 const laibaImg = new Image();
-laibaImg.src = "images/laiba.png"; 
+laibaImg.src = "laiba.png"; 
 const heartImg = new Image();
-heartImg.src = "images/heart.png"; 
+heartImg.src = "heart.png"; 
 
 // Love quotes per stage
 const loveQuotes = [
@@ -156,10 +156,12 @@ let timerInterval = setInterval(()=>{
         "I want you in every life, forever and always.",
         "You are my heartbeat, my sunshine, my everything.",
         "No distance, no time, can ever reduce my love for you.",
-        "Together, we are complete, and life feels magical. ✨"
+        "Together, we are complete, and life feels magical. ✨",
+        "Every moment with you is a dream I never want to end.",
+        "Laiba, you are my forever. ❤️💞"
       ];
       messages.forEach((msg, i)=>{
-        ctx.fillText(msg, 40, 200 + i*30);
+        ctx.fillText(msg, 20, 180 + i*30);
       });
       info.innerText = `Final Hearts Collected: ${heartsCollected}`;
       quest.innerText = "❤️💞";
