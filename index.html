@@ -26,6 +26,7 @@ const info = document.getElementById('info');
 const quest = document.getElementById('quest');
 const loading = document.getElementById('loading');
 
+// Game variables
 let stage = 1;
 const maxStage = 10;
 let heartsCollected = 0;
@@ -36,6 +37,7 @@ let frame = 0;
 let faizanX = 50;
 let laibaX = canvas.width - 100;
 
+// Love quotes per stage
 const loveQuotes = [
   "I love Laiba more than words can say ❤️",
   "Every heartbeat reminds me of Laiba 💖",
@@ -72,6 +74,8 @@ function imageLoaded(){
 }
 
 function startGame(){
+
+  // Handle tap/click
   canvas.addEventListener('touchstart', handleTap);
   canvas.addEventListener('mousedown', handleTap);
 
@@ -91,24 +95,27 @@ function startGame(){
     });
   }
 
+  // Spawn heart
   function spawnHeart(){
     hearts.push({x:Math.random()*(canvas.width-35), y:-30, size:35, collected:false, blast:0});
   }
 
+  // Game loop
   function update(){
     frame++;
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     // Draw background
-    let bg = bgImgs[stage-1];
-    ctx.drawImage(bg,0,0,canvas.width,canvas.height);
+    ctx.drawImage(bgImgs[stage-1],0,0,canvas.width,canvas.height);
 
     // Draw lovers
     ctx.drawImage(faizanImg, faizanX, 500, 50, 70);
     ctx.drawImage(laibaImg, laibaX, 500, 50, 70);
 
-    // Hearts
-    if(frame % 30 ===0) spawnHeart();
+    // Spawn hearts regularly
+    if(frame % 20 ===0) spawnHeart();
+
+    // Update hearts
     hearts.forEach((heart,i)=>{
       if(!heart.collected) heart.y += 3 + stage*0.3;
 
@@ -124,7 +131,7 @@ function startGame(){
         heart.blast--;
       }
 
-      // Remove offscreen hearts
+      // Remove offscreen
       if(heart.y > canvas.height) hearts.splice(i,1);
     });
 
@@ -136,6 +143,7 @@ function startGame(){
 
   update();
 
+  // Timer
   let timerInterval = setInterval(()=>{
     stageTime--;
     if(stageTime <=0 || heartsCollected >= heartsNeeded){
@@ -146,7 +154,7 @@ function startGame(){
       stage++;
       if(stage > maxStage){
         clearInterval(timerInterval);
-        // Final hug scene
+        hearts = [];
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.drawImage(bgImgs[9],0,0,canvas.width,canvas.height);
         ctx.drawImage(faizanImg, 170, 500, 50, 70);
@@ -163,7 +171,7 @@ function startGame(){
           "Every moment with you is a dream I never want to end.",
           "Laiba, you are my forever. ❤️💞"
         ];
-        messages.forEach((msg, i)=>{
+        messages.forEach((msg,i)=>{
           ctx.fillText(msg, 20, 180 + i*30);
         });
         info.innerText = `Final Hearts Collected: ${heartsCollected}`;
