@@ -41,14 +41,25 @@ const loveQuotes=[
   "I love you so much, Laiba! ❤️💞"
 ];
 
-// Tap / click to collect heart
+// Load images
+const bgFiles=['bg1.png','bg2.png','bg3.jpg','bg4.jpg','bg5.jpg','bg6.jpg','bg7.png','bg8.jpg','bg9.jpg','bg10.png'];
+const bgImgs = [];
+bgFiles.forEach(f=>{
+    const img=new Image();
+    img.src=f; bgImgs.push(img);
+});
+const faizanImg=new Image(); faizanImg.src="faizan.png";
+const laibaImg=new Image(); laibaImg.src="laiba.png";
+const heartImg=new Image(); heartImg.src="heart.png";
+
+// Click / tap handler
 canvas.addEventListener('mousedown', clickHandler);
 canvas.addEventListener('touchstart', clickHandler);
 
 function clickHandler(e){
-    let rect = canvas.getBoundingClientRect();
-    let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    let rect=canvas.getBoundingClientRect();
+    let x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+    let y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
     hearts.forEach(h=>{
         if(!h.collected && x>=h.x && x<=h.x+h.size && y>=h.y && y<=h.y+h.size){
             h.collected=true; heartsCollected++; h.blast=10;
@@ -63,13 +74,16 @@ function update(){
     frame++;
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Background
-    ctx.fillStyle=`hsl(${stage*30},80%,90%)`;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    // Background image (fallback: colored rectangle)
+    if(bgImgs[stage-1].complete) ctx.drawImage(bgImgs[stage-1],0,0,canvas.width,canvas.height);
+    else { ctx.fillStyle=`hsl(${stage*30},80%,90%)`; ctx.fillRect(0,0,canvas.width,canvas.height); }
 
-    // Draw lovers
-    ctx.fillStyle='blue'; ctx.fillRect(faizanX,500,50,70);
-    ctx.fillStyle='pink'; ctx.fillRect(laibaX,500,50,70);
+    // Lovers
+    if(faizanImg.complete) ctx.drawImage(faizanImg,faizanX,500,50,70);
+    else { ctx.fillStyle='blue'; ctx.fillRect(faizanX,500,50,70); }
+
+    if(laibaImg.complete) ctx.drawImage(laibaImg,laibaX,500,50,70);
+    else { ctx.fillStyle='pink'; ctx.fillRect(laibaX,500,50,70); }
 
     // Spawn hearts
     if(frame%30===0) spawnHeart();
@@ -77,7 +91,10 @@ function update(){
     // Draw hearts
     hearts.forEach((h,i)=>{
         if(!h.collected) h.y += 3 + stage*0.2;
-        if(!h.collected){ ctx.fillStyle='red'; ctx.fillRect(h.x,h.y,h.size,h.size);}
+        if(!h.collected){
+            if(heartImg.complete) ctx.drawImage(heartImg,h.x,h.y,h.size,h.size);
+            else { ctx.fillStyle='red'; ctx.fillRect(h.x,h.y,h.size,h.size); }
+        }
         if(h.blast>0){ ctx.fillStyle='yellow'; ctx.beginPath(); ctx.arc(h.x+h.size/2,h.y+h.size/2,15,0,Math.PI*2); ctx.fill(); h.blast--; }
         if(h.y>canvas.height) hearts.splice(i,1);
     });
@@ -99,8 +116,9 @@ let timerInterval = setInterval(()=>{
         if(stage>maxStage){
             clearInterval(timerInterval); hearts=[];
             ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle='blue'; ctx.fillRect(170,500,50,70);
-            ctx.fillStyle='pink'; ctx.fillRect(180,500,50,70);
+            ctx.drawImage(bgImgs[9],0,0,canvas.width,canvas.height);
+            ctx.drawImage(faizanImg,170,500,50,70);
+            ctx.drawImage(laibaImg,180,500,50,70);
             ctx.fillStyle='black'; ctx.font='18px Arial';
             const messages=[
                 "Faizan hugs Laiba! 🥰💖",
