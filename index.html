@@ -41,21 +41,20 @@ const loveQuotes=[
   "I love you so much, Laiba! ❤️💞"
 ];
 
-// Load images
+// Images
 const bgFiles=['bg1.png','bg2.png','bg3.jpg','bg4.jpg','bg5.jpg','bg6.jpg','bg7.png','bg8.jpg','bg9.jpg','bg10.png'];
-const bgImgs = [];
-bgFiles.forEach(f=>{
-    const img=new Image();
-    img.src=f; bgImgs.push(img);
+const bgImgs = bgFiles.map(f=>{
+  const img=new Image();
+  img.src=f;
+  return img;
 });
 const faizanImg=new Image(); faizanImg.src="faizan.png";
 const laibaImg=new Image(); laibaImg.src="laiba.png";
 const heartImg=new Image(); heartImg.src="heart.png";
 
-// Click / tap handler
+// Click / tap
 canvas.addEventListener('mousedown', clickHandler);
 canvas.addEventListener('touchstart', clickHandler);
-
 function clickHandler(e){
     let rect=canvas.getBoundingClientRect();
     let x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
@@ -74,16 +73,15 @@ function update(){
     frame++;
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Background image (fallback: colored rectangle)
+    // Background
     if(bgImgs[stage-1].complete) ctx.drawImage(bgImgs[stage-1],0,0,canvas.width,canvas.height);
-    else { ctx.fillStyle=`hsl(${stage*30},80%,90%)`; ctx.fillRect(0,0,canvas.width,canvas.height); }
+    else ctx.fillStyle=`hsl(${stage*30},80%,90%)`, ctx.fillRect(0,0,canvas.width,canvas.height);
 
     // Lovers
     if(faizanImg.complete) ctx.drawImage(faizanImg,faizanX,500,50,70);
-    else { ctx.fillStyle='blue'; ctx.fillRect(faizanX,500,50,70); }
-
+    else ctx.fillStyle='blue', ctx.fillRect(faizanX,500,50,70);
     if(laibaImg.complete) ctx.drawImage(laibaImg,laibaX,500,50,70);
-    else { ctx.fillStyle='pink'; ctx.fillRect(laibaX,500,50,70); }
+    else ctx.fillStyle='pink', ctx.fillRect(laibaX,500,50,70);
 
     // Spawn hearts
     if(frame%30===0) spawnHeart();
@@ -91,7 +89,7 @@ function update(){
     // Draw hearts
     hearts.forEach((h,i)=>{
         if(!h.collected) h.y += 3 + stage*0.2;
-        if(!h.collected){
+        if(!h.collected){ 
             if(heartImg.complete) ctx.drawImage(heartImg,h.x,h.y,h.size,h.size);
             else { ctx.fillStyle='red'; ctx.fillRect(h.x,h.y,h.size,h.size); }
         }
@@ -116,7 +114,7 @@ let timerInterval = setInterval(()=>{
         if(stage>maxStage){
             clearInterval(timerInterval); hearts=[];
             ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.drawImage(bgImgs[9],0,0,canvas.width,canvas.height);
+            if(bgImgs[9].complete) ctx.drawImage(bgImgs[9],0,0,canvas.width,canvas.height);
             ctx.drawImage(faizanImg,170,500,50,70);
             ctx.drawImage(laibaImg,180,500,50,70);
             ctx.fillStyle='black'; ctx.font='18px Arial';
