@@ -15,8 +15,8 @@ canvas { display:block; margin:auto; touch-action: none; border:2px solid #333; 
 <body>
 <h1>FAIZAN AND LAIBA - Love Quest</h1>
 <div id="loading">Loading game, please wait...</div>
-<div id="info">Stage: 1 / 10 | Hearts Collected: 0 / 100 | Time: 60</div>
-<div id="quest">How much do I love Laiba? ❤️</div>
+<div id="info"></div>
+<div id="quest"></div>
 <canvas id="gameCanvas" width="400" height="600"></canvas>
 
 <script>
@@ -26,18 +26,9 @@ const info = document.getElementById('info');
 const quest = document.getElementById('quest');
 const loading = document.getElementById('loading');
 
-// Game variables
-let stage = 1;
-const maxStage = 10;
-let heartsCollected = 0;
-let heartsNeeded = 100;
-let stageTime = 60;
-let hearts = [];
-let frame = 0;
-let faizanX = 50;
-let laibaX = canvas.width - 100;
+let stage = 1, maxStage = 10, heartsCollected = 0, heartsNeeded = 100, stageTime = 60;
+let hearts = [], frame = 0, faizanX = 50, laibaX = 300;
 
-// Love quotes per stage
 const loveQuotes = [
   "I love Laiba more than words can say ❤️",
   "Every heartbeat reminds me of Laiba 💖",
@@ -51,139 +42,88 @@ const loveQuotes = [
   "I love you so much, Laiba! I want you in every life ❤️💞"
 ];
 
-// Preload images
-let imagesToLoad = 13; // 10 bg + faizan + laiba + heart
+// Load images
+let imagesToLoad = 13;
 const bgImgs = [];
-for(let i=1;i<=10;i++){
-  const img = new Image();
-  img.src = `bg${i}.png`;
-  img.onload = imageLoaded;
-  bgImgs.push(img);
-}
+for(let i=1;i<=10;i++){ let img=new Image(); img.src=`bg${i}.png`; img.onload=imageLoaded; bgImgs.push(img);}
+const faizanImg = new Image(); faizanImg.src="faizan.png"; faizanImg.onload=imageLoaded;
+const laibaImg = new Image(); laibaImg.src="laiba.png"; laibaImg.onload=imageLoaded;
+const heartImg = new Image(); heartImg.src="heart.png"; heartImg.onload=imageLoaded;
 
-const faizanImg = new Image(); faizanImg.src = "faizan.png"; faizanImg.onload = imageLoaded;
-const laibaImg = new Image(); laibaImg.src = "laiba.png"; laibaImg.onload = imageLoaded;
-const heartImg = new Image(); heartImg.src = "heart.png"; heartImg.onload = imageLoaded;
-
-function imageLoaded(){
-    imagesToLoad--;
-    if(imagesToLoad === 0){
-        loading.style.display = "none";
-        startGame();
-    }
-}
+function imageLoaded(){ imagesToLoad--; if(imagesToLoad===0){ loading.style.display="none"; startGame(); }}
 
 function startGame(){
+  info.innerText=`Stage: ${stage} / ${maxStage} | Hearts: ${heartsCollected}/${heartsNeeded} | Time: ${stageTime}`;
+  quest.innerText = loveQuotes[stage-1];
 
-  // Handle tap/click
-  canvas.addEventListener('touchstart', handleTap);
-  canvas.addEventListener('mousedown', handleTap);
+  canvas.addEventListener('mousedown', clickHandler);
+  canvas.addEventListener('touchstart', clickHandler);
 
-  function handleTap(e){
+  function clickHandler(e){
     let rect = canvas.getBoundingClientRect();
     let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
     let y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-
-    hearts.forEach((heart)=>{
-      if(!heart.collected &&
-         x >= heart.x && x <= heart.x + heart.size &&
-         y >= heart.y && y <= heart.y + heart.size){
-           heart.collected = true;
-           heartsCollected++;
-           heart.blast = 15; // blast animation
+    hearts.forEach(h=>{
+      if(!h.collected && x>=h.x && x<=h.x+h.size && y>=h.y && y<=h.y+h.size){
+        h.collected=true; heartsCollected++; h.blast=10;
       }
     });
   }
 
-  // Spawn heart
-  function spawnHeart(){
-    hearts.push({x:Math.random()*(canvas.width-35), y:-30, size:35, collected:false, blast:0});
-  }
+  function spawnHeart(){ hearts.push({x:Math.random()*(canvas.width-35),y:-30,size:35,collected:false,blast:0}); }
 
-  // Game loop
   function update(){
     frame++;
     ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    // Draw background
     ctx.drawImage(bgImgs[stage-1],0,0,canvas.width,canvas.height);
+    ctx.drawImage(faizanImg, faizanX,500,50,70);
+    ctx.drawImage(laibaImg, laibaX,500,50,70);
 
-    // Draw lovers
-    ctx.drawImage(faizanImg, faizanX, 500, 50, 70);
-    ctx.drawImage(laibaImg, laibaX, 500, 50, 70);
+    if(frame%30===0) spawnHeart();
 
-    // Spawn hearts regularly
-    if(frame % 20 ===0) spawnHeart();
-
-    // Update hearts
-    hearts.forEach((heart,i)=>{
-      if(!heart.collected) heart.y += 3 + stage*0.3;
-
-      // Draw heart
-      if(!heart.collected) ctx.drawImage(heartImg, heart.x, heart.y, heart.size, heart.size);
-
-      // Blast animation
-      if(heart.blast>0){
-        ctx.fillStyle='yellow';
-        ctx.beginPath();
-        ctx.arc(heart.x+heart.size/2, heart.y+heart.size/2, 15, 0, Math.PI*2);
-        ctx.fill();
-        heart.blast--;
-      }
-
-      // Remove offscreen
-      if(heart.y > canvas.height) hearts.splice(i,1);
+    hearts.forEach((h,i)=>{
+      if(!h.collected) h.y+=3+stage*0.2;
+      if(!h.collected) ctx.drawImage(heartImg,h.x,h.y,h.size,h.size);
+      if(h.blast>0){ ctx.fillStyle='yellow'; ctx.beginPath(); ctx.arc(h.x+h.size/2,h.y+h.size/2,15,0,Math.PI*2); ctx.fill(); h.blast--; }
+      if(h.y>canvas.height) hearts.splice(i,1);
     });
 
-    info.innerText = `Stage: ${stage} / ${maxStage} | Hearts Collected: ${heartsCollected} / ${heartsNeeded} | Time: ${stageTime}`;
+    info.innerText=`Stage: ${stage} / ${maxStage} | Hearts: ${heartsCollected}/${heartsNeeded} | Time: ${stageTime}`;
     quest.innerText = loveQuotes[stage-1];
-
     requestAnimationFrame(update);
   }
-
   update();
 
-  // Timer
-  let timerInterval = setInterval(()=>{
+  let timerInterval=setInterval(()=>{
     stageTime--;
-    if(stageTime <=0 || heartsCollected >= heartsNeeded){
-      // Move lovers closer
-      faizanX += 25;
-      laibaX -= 25;
-
+    if(stageTime<=0 || heartsCollected>=heartsNeeded){
+      faizanX+=25; laibaX-=25;
       stage++;
-      if(stage > maxStage){
-        clearInterval(timerInterval);
-        hearts = [];
+      if(stage>maxStage){
+        clearInterval(timerInterval); hearts=[];
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.drawImage(bgImgs[9],0,0,canvas.width,canvas.height);
-        ctx.drawImage(faizanImg, 170, 500, 50, 70);
-        ctx.drawImage(laibaImg, 180, 500, 50, 70);
-        ctx.fillStyle='black';
-        ctx.font='20px Arial';
-        const messages = [
-          "Faizan hugs Laiba tightly! 🥰💖",
+        ctx.drawImage(faizanImg,170,500,50,70);
+        ctx.drawImage(laibaImg,180,500,50,70);
+        ctx.fillStyle='black'; ctx.font='18px Arial';
+        const messages=[
+          "Faizan hugs Laiba! 🥰💖",
           "I love you so much, Laiba!",
           "I want you in every life, forever and always.",
           "You are my heartbeat, my sunshine, my everything.",
-          "No distance, no time, can ever reduce my love for you.",
-          "Together, we are complete, and life feels magical. ✨",
+          "Together, life feels magical ✨",
           "Every moment with you is a dream I never want to end.",
-          "Laiba, you are my forever. ❤️💞"
+          "Laiba, you are my forever ❤️💞"
         ];
-        messages.forEach((msg,i)=>{
-          ctx.fillText(msg, 20, 180 + i*30);
-        });
-        info.innerText = `Final Hearts Collected: ${heartsCollected}`;
-        quest.innerText = "❤️💞";
+        messages.forEach((msg,i)=>ctx.fillText(msg,20,180+i*25));
+        info.innerText=`Final Hearts Collected: ${heartsCollected}`;
+        quest.innerText="❤️💞";
         return;
       }
-
-      // Next stage
       heartsCollected=0;
-      heartsNeeded = 100 + stage*50; 
-      stageTime = 60 + stage*30; 
-      hearts = [];
+      heartsNeeded=100+stage*50;
+      stageTime=60+stage*30;
+      hearts=[];
     }
   },1000);
 }
